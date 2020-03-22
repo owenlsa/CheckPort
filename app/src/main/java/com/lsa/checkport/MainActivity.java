@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -31,21 +32,22 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
 public class MainActivity extends AppCompatActivity {
-    final public String SERVER_JSON = "config.json"; //保存的json配置文件名
-    final public int TV_UPDATE_PERIOD = 500; //TextView自动刷新时间间隔
 
+    final protected String SERVER_JSON = "config.json"; //保存的json配置文件名
+    final protected int TV_UPDATE_PERIOD = 500; //TextView自动刷新时间间隔
+
+    protected JSONArray jsonArrayCurrent;
     private TextView textViewData1;
     private EditText etPort;
     private EditText etDomain;
-    private RecyclerView recyclerView;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager layoutManager;
+
 
     private int totalPortAmount = 0;
     private int doneTimes = 0;
     private int okTimes = 0;
     private String failList = "";
-
+    private String[] myDataset;
+    private int UPDATE_LIST = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,18 +55,26 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         //View里的模块定义
         textViewData1 = findViewById(R.id.textView1);
-        etDomain = (EditText) findViewById(R.id.inDomain);
-        etPort = (EditText) findViewById(R.id.inPort);
+        etDomain = findViewById(R.id.inDomain);
+        etPort = findViewById(R.id.inPort);
 
-        recyclerView = (RecyclerView) findViewById(R.id.serverRecycler);
+        loadJson(SERVER_JSON); //获取json，初始化jsonArrayCurrent
 
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
-        recyclerView.setHasFixedSize(true);
-
-        // use a linear layout manager
-        layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
+        // specify an adapter (see also next example)
+        if (jsonArrayCurrent != null) {
+            myDataset = new String[jsonArrayCurrent.length()];
+            for (int i = 0; i < jsonArrayCurrent.length(); i++) {
+                try {
+                    JSONObject jsonObject = jsonArrayCurrent.getJSONObject(i);
+                    myDataset[i] = jsonObject.getString("domain") + "\n"
+                    + jsonObject.getString("port");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            //代入myDataset显示
+            //...
+        }
 
 
 
@@ -75,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
                     textViewData1.setText("Scaning:  " + doneTimes + " / " + totalPortAmount
                             + "\nAmount of Open Ports: " + okTimes+ " / " + totalPortAmount
                             + "\n\nClose Ports:  " + failList);
+                    updateList();
                     sendEmptyMessageDelayed(0, TV_UPDATE_PERIOD);
                 }
             }
@@ -83,7 +94,6 @@ public class MainActivity extends AppCompatActivity {
         mTimeHandler.sendEmptyMessageDelayed(0,TV_UPDATE_PERIOD);
 
     }
-
 
 
     @SuppressLint("SetTextI18n")
@@ -160,6 +170,7 @@ public class MainActivity extends AppCompatActivity {
                 writeJson(addDomain, addPort,SERVER_JSON);
             }
         }).start();
+
     }
 
 
@@ -184,14 +195,19 @@ public class MainActivity extends AppCompatActivity {
             }
             bufferedReader.close();
             inputStreamReader.close();
+
             //builder.toString()返回表示此序列中数据的字符串
+            //这里如果strBuilder是空，会JSONException
             JSONArray jsonArray = new JSONArray(strBuilder.toString());
+
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("domain",getDomain);
             jsonObject.put("port",getPort);
             jsonArray.put(jsonObject);
+            jsonArrayCurrent = jsonArray; //更新jsonArrayCurrent用来更新列表
+            jsonArrayExplain(); //更新myDataset
             String context = jsonArray.toString();
-            WriteSDFile(context, getFilename);
+            WriteSDFile(context, getFilename); //重新输出到json
 
 
         } catch (FileNotFoundException e) {//文件不存在，初始化
@@ -208,7 +224,25 @@ public class MainActivity extends AppCompatActivity {
             }
 
 
-        } catch (Exception e) {
+
+        } catch (JSONException e) { //这里strBuilder是空
+            try {
+                JSONArray jsonArray = new JSONArray();
+
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("domain",getDomain);
+                jsonObject.put("port",getPort);
+                jsonArray.put(jsonObject);
+                jsonArrayCurrent = jsonArray; //更新jsonArrayCurrent用来更新列表
+                jsonArrayExplain(); //更新myDataset
+                String context = jsonArray.toString();
+                WriteSDFile(context, getFilename); //重新输出到json
+            } catch (Exception ee) {
+                ee.printStackTrace();
+            }
+
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -232,14 +266,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void onLoadJSON(View view) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                loadJson(SERVER_JSON);
-            }
-        }).start();
-    }
+
 
     public void loadJson(String getFilename) {
         //json文件存放路径
@@ -263,34 +290,59 @@ public class MainActivity extends AppCompatActivity {
             bufferedReader.close();
             inputStreamReader.close();
             //builder.toString()返回表示此序列中数据的字符串
-            JSONArray jsonArray = new JSONArray(strBuilder.toString());
-            JSONObject jsonObject = new JSONObject();
-//            jsonObject.put("domain",getDomain);
-//            jsonObject.put("port",getPort);
-            jsonArray.put(jsonObject);
-            String context = jsonArray.toString();
-            WriteSDFile(context, getFilename);
-
-
-        } catch (FileNotFoundException e) {//文件不存在，初始化
-            try {
-                JSONArray jsonArray = new JSONArray();
-                JSONObject jsonObject = new JSONObject();
-//                jsonObject.put("domain",getDomain);
-//                jsonObject.put("port",getPort);
-                jsonArray.put(jsonObject);
-                String context = jsonArray.toString();
-                WriteSDFile(context, getFilename);
-            } catch (Exception ee) {
-                ee.printStackTrace();
+            if (strBuilder.length() != 0) {
+                jsonArrayCurrent = new JSONArray(strBuilder.toString());
+                System.out.println("json初始化成功");
             }
 
-
-        } catch (Exception e) {
+        } catch (FileNotFoundException e) {//文件不存在，初始化
+                    WriteSDFile(null, getFilename);
+        }  catch (Exception e) {
             e.printStackTrace();
+        }
+
+        if (jsonArrayCurrent != null) {
+            String[] myDataset = new String[jsonArrayCurrent.length()];
+            for (int i = 0; i < jsonArrayCurrent.length(); i++) {
+                try {
+                    JSONObject jsonObject = jsonArrayCurrent.getJSONObject(i);
+                    myDataset[i] = jsonObject.getString("domain") + "\n"
+                            + jsonObject.getString("port");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            //代入myDataset显示
+            //...
         }
 
 
     }
+
+    public void updateList() {
+        if (UPDATE_LIST == 1){
+            //代入myDataset显示
+            //...
+            UPDATE_LIST = 0;
+        }
+
+    }
+
+    public void jsonArrayExplain() {
+        if (jsonArrayCurrent != null) {
+            myDataset = new String[jsonArrayCurrent.length()];
+            for (int i = 0; i < jsonArrayCurrent.length(); i++) {
+                try {
+                    JSONObject jsonObject = jsonArrayCurrent.getJSONObject(i);
+                    myDataset[i] = jsonObject.getString("domain") + "\n"
+                            + jsonObject.getString("port");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            UPDATE_LIST = 1;
+        }
+    }
+
 
 }

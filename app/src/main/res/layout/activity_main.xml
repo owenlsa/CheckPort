@@ -80,20 +80,39 @@
         app:layout_constraintTop_toBottomOf="@+id/btnScan" />
 
     <TextView
-        android:id="@+id/serverListTitle"
-        android:layout_width="wrap_content"
+        android:id="@+id/textViewResult"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="8dp"
-        android:text="Saved Server List"
-        android:textAlignment="center"
-        android:textStyle="italic"
-        app:layout_constraintBottom_toTopOf="@+id/serverList"
+        android:gravity="center"
+        android:text="Result"
+        android:textAlignment="textStart"
+        android:textColor="?android:attr/textColorPrimary"
+        app:layout_constraintBottom_toTopOf="@+id/serverListTitle"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnAddJSON" />
+
+    <TextView
+        android:id="@+id/serverListTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="32dp"
+        android:text="Saved Server List"
+        android:textAlignment="textStart"
+        android:textColor="@color/colorAccent"
+        android:textSize="10sp"
+        app:layout_constraintBottom_toTopOf="@+id/serverList"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewResult" />
 
     <ListView
         android:id="@+id/serverList"
@@ -103,26 +122,10 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
         android:fadingEdge="none"
-        app:layout_constraintBottom_toTopOf="@id/textViewResult"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/serverListTitle" />
-
-    <TextView
-        android:id="@+id/textViewResult"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="8dp"
-        android:gravity="center"
-        android:text="Result"
-        android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/serverList" />
+        app:layout_constraintTop_toBottomOf="@+id/serverListTitle" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         Handler mTimeHandler = new Handler() {
             public void handleMessage(android.os.Message msg) {
                 if (msg.what == 0) {
-                    textViewData1.setText("Scaning:  " + doneTimes + " / " + totalPortAmount
+                    textViewData1.setText("Scanning Ports:  " + doneTimes + " / " + totalPortAmount
                             + "\nAmount of Open Ports: " + okTimes+ " / " + totalPortAmount
                             + "\nClose Ports:  " + failList); //刷新result
                     onUpdateListView(); //刷新listView
@@ -185,6 +185,7 @@ public class MainActivity extends AppCompatActivity {
                 doneTimes = doneTimes + 1; //已完成端口计数
 
             } catch (Exception e) {
+                SCANNING = 0;
                 System.out.println("Error 102");
                 e.printStackTrace();
             }

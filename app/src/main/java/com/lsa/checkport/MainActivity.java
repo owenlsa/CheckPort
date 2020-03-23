@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private ListView listView;
     private String[] myDataset;
     private int UPDATE_LIST = 0;
+    private int SCANNING = 0;
 
     private int totalPortAmount = 0;
     private int doneTimes = 0;
@@ -105,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
     public void updateListView() {
         //定义ArrayAdapter
         final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, android.R.id.text1, myDataset);
+                R.layout.list_item, R.id.textViewList, myDataset);
         listView.setAdapter(adapter); //给listView设置ArrayAdapter
         //监听点击
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -139,23 +140,30 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     public void onScan(View view) {
-        totalPortAmount = 0;
-        doneTimes = 0;
-        okTimes = 0;
-        failList = "";
-        final String strDomain = etDomain.getText().toString();
-        final String strPort = etPort.getText().toString();
-        if (strDomain.equals("") || strPort.equals("")) {
-            Toast.makeText(this,"Please enter server and port.",
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                startScanner(strDomain, strPort);
+        if (SCANNING == 0) {
+            totalPortAmount = 0;
+            doneTimes = 0;
+            okTimes = 0;
+            failList = "";
+            SCANNING = 1;
+            final String strDomain = etDomain.getText().toString();
+            final String strPort = etPort.getText().toString();
+            if (strDomain.equals("") || strPort.equals("")) {
+                Toast.makeText(this,"Please enter server and port.",
+                        Toast.LENGTH_SHORT).show();
+                return;
             }
-        }).start();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    startScanner(strDomain, strPort);
+                }
+            }).start();
+        } else {
+            Toast.makeText(this,"Already scanning, please wait.",
+                    Toast.LENGTH_SHORT).show();
+        }
+
     }
 
 
@@ -181,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+        SCANNING = 0;
     }
 
 

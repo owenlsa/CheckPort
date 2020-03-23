@@ -3,6 +3,7 @@ package com.lsa.checkport;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -37,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
     private TextView textViewData1;
     private EditText etPort;
     private EditText etDomain;
-
     private ListView listView;
     private String[] myDataset;
     private int UPDATE_LIST = 0;
@@ -128,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long l) {
                 //删除json内条目并toast提示
                 //String value=adapter.getItem(position);
+                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
                 onDelJSON(position);//删除json内条目
                 Toast.makeText(getApplicationContext(),"Deleted",Toast.LENGTH_SHORT).show();
                 return false;

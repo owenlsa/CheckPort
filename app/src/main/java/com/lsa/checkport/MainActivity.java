@@ -32,7 +32,7 @@ import java.net.SocketAddress;
 public class MainActivity extends AppCompatActivity {
 
     final protected String SERVER_JSON = "config.json"; //保存的json配置文件名
-    final protected int TV_UPDATE_PERIOD = 500; //TextView自动刷新时间间隔
+    final protected int TV_UPDATE_PERIOD = 300; //TextView自动刷新时间间隔
 
     protected JSONArray jsonArrayCurrent;
     private TextView textViewData1;

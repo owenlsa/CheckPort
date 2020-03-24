@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private int doneTimes = 0;
     private int okTimes = 0;
     private String failList = "";
+    private String scanIP = "";
 
 
     @Override
@@ -65,30 +66,15 @@ public class MainActivity extends AppCompatActivity {
         btnScanBtn = findViewById(R.id.btnScan);
 
         loadJson(SERVER_JSON); //获取json，初始化jsonArrayCurrent
-
-        if (jsonArrayCurrent != null) {
-            myDataset = new String[jsonArrayCurrent.length()];
-            for (int i = 0; i < jsonArrayCurrent.length(); i++) {
-                try {
-                    //提取jsonArrayCurrent中的内容到myDataset以供listView显示
-                    JSONObject jsonObject = jsonArrayCurrent.getJSONObject(i);
-                    myDataset[i] = jsonObject.getString("domain") + "\n"
-                    + jsonObject.getString("port");
-                } catch (Exception e) {
-                    System.out.println("Error 101");
-                    e.printStackTrace();
-                }
-            }
-            updateListView(); //刷新listView
-        }
+        jsonArrayExplain(); //提取到myDataset以供listView显示
 
         //声明定时刷新textView的Handler
         Handler mTimeHandler = new Handler() {
             public void handleMessage(android.os.Message msg) {
                 if (msg.what == 0) {
-                    textViewData1.setText("Scanning Ports:  " + doneTimes + " / " + totalPortAmount
-                            + "\nAmount of Open Ports: " + okTimes+ " / " + totalPortAmount
-                            + "\nClose Ports:  " + failList); //刷新result
+                    textViewData1.setText("Scanning IP:  " + scanIP + "\nTotal:  " + doneTimes
+                            + " / " + totalPortAmount + " ,  Open:  " + okTimes
+                            + "\nClose:  " + failList); //刷新result
                     onUpdateListView(); //刷新listView
                     sendEmptyMessageDelayed(0, TV_UPDATE_PERIOD);
                 }
@@ -145,20 +131,21 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     public void onScan(View view) {
+        final String strDomain = etDomain.getText().toString();
+        final String strPort = etPort.getText().toString();
+        if (strDomain.equals("") || strPort.equals("")) {
+            Toast.makeText(this,"Please enter server and port.",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
         if (SCANNING == 0) {
             totalPortAmount = 0;
             doneTimes = 0;
             okTimes = 0;
             failList = "";
+            scanIP = "";
             SCANNING = 1;
             btnScanBtn.setBackgroundTintList(getColorStateList(R.color.colorAccent));
-            final String strDomain = etDomain.getText().toString();
-            final String strPort = etPort.getText().toString();
-            if (strDomain.equals("") || strPort.equals("")) {
-                Toast.makeText(this,"Please enter server and port.",
-                        Toast.LENGTH_SHORT).show();
-                return;
-            }
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -181,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
                 int port = Integer.parseInt(strPortArr[i]);
                 InetAddress inetAddress = InetAddress.getByName(strDomain);
                 String ip = inetAddress.getHostAddress();
-
+                scanIP = ip;
                 int output = ScannerPortisAlive(ip, port);
                 if (output == 1) {
                     okTimes = okTimes + 1; //成功连接端口计数
@@ -363,20 +350,7 @@ public class MainActivity extends AppCompatActivity {
             System.out.println("Error 301");
             e.printStackTrace();
         }
-
-        if (jsonArrayCurrent != null) {
-            String[] myDataset = new String[jsonArrayCurrent.length()];
-            for (int i = 0; i < jsonArrayCurrent.length(); i++) {
-                try {
-                    JSONObject jsonObject = jsonArrayCurrent.getJSONObject(i);
-                    myDataset[i] = jsonObject.getString("domain") + "\n"
-                            + jsonObject.getString("port");
-                } catch (Exception e) {
-                    System.out.println("Error 302");
-                    e.printStackTrace();
-                }
-            }
-        }
+        jsonArrayExplain();
     }
 
 

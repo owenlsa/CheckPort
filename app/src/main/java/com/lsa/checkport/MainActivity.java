@@ -1,12 +1,15 @@
 package com.lsa.checkport;
 
 import android.annotation.SuppressLint;
+import android.content.res.ColorStateList;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -38,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView textViewData1;
     private EditText etPort;
     private EditText etDomain;
+    private Button btnScanBtn;
     private ListView listView;
     private String[] myDataset;
     private int UPDATE_LIST = 0;
@@ -58,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
         etDomain = findViewById(R.id.inDomain);
         etPort = findViewById(R.id.inPort);
         listView= findViewById(R.id.serverList);
+        btnScanBtn = findViewById(R.id.btnScan);
 
         loadJson(SERVER_JSON); //获取json，初始化jsonArrayCurrent
 
@@ -146,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
             okTimes = 0;
             failList = "";
             SCANNING = 1;
+            btnScanBtn.setBackgroundTintList(getColorStateList(R.color.colorAccent));
             final String strDomain = etDomain.getText().toString();
             final String strPort = etPort.getText().toString();
             if (strDomain.equals("") || strPort.equals("")) {
@@ -186,11 +192,13 @@ public class MainActivity extends AppCompatActivity {
 
             } catch (Exception e) {
                 SCANNING = 0;
+                btnScanBtn.setBackgroundTintList(getColorStateList(R.color.colorPrimary));
                 System.out.println("Error 102");
                 e.printStackTrace();
             }
         }
         SCANNING = 0;
+        btnScanBtn.setBackgroundTintList(getColorStateList(R.color.colorPrimary));
     }
 
 

@@ -1,8 +1,6 @@
 package com.lsa.checkport;
 
 import android.annotation.SuppressLint;
-import android.content.res.ColorStateList;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.HapticFeedbackConstants;
@@ -48,8 +46,8 @@ public class MainActivity extends AppCompatActivity {
     private int SCANNING = 0;
 
     private int totalPortAmount = 0;
-    private int doneTimes = 0;
-    private int okTimes = 0;
+    private int portsDoneCount = 0;
+    private int portsOpenCount = 0;
     private String failList = "";
     private String scanIP = "";
 
@@ -72,8 +70,8 @@ public class MainActivity extends AppCompatActivity {
         Handler mTimeHandler = new Handler() {
             public void handleMessage(android.os.Message msg) {
                 if (msg.what == 0) {
-                    textViewData1.setText("Scanning IP:  " + scanIP + "\nTotal:  " + doneTimes
-                            + " / " + totalPortAmount + " ,  Open:  " + okTimes
+                    textViewData1.setText("Scanning IP:  " + scanIP + "\nTotal:  " + portsDoneCount
+                            + " / " + totalPortAmount + " ,  Open:  " + portsOpenCount
                             + "\nClose:  " + failList); //刷新result
                     onUpdateListView(); //刷新listView
                     sendEmptyMessageDelayed(0, TV_UPDATE_PERIOD);
@@ -140,8 +138,8 @@ public class MainActivity extends AppCompatActivity {
         }
         if (SCANNING == 0) {
             totalPortAmount = 0;
-            doneTimes = 0;
-            okTimes = 0;
+            portsDoneCount = 0;
+            portsOpenCount = 0;
             failList = "";
             scanIP = "";
             SCANNING = 1;
@@ -171,11 +169,11 @@ public class MainActivity extends AppCompatActivity {
                 scanIP = ip;
                 int output = ScannerPortisAlive(ip, port);
                 if (output == 1) {
-                    okTimes = okTimes + 1; //成功连接端口计数
+                    portsOpenCount = portsOpenCount + 1; //成功连接端口计数
                 } else {
                     failList = failList + port + ","; //失败端口统计
                 }
-                doneTimes = doneTimes + 1; //已完成端口计数
+                portsDoneCount = portsDoneCount + 1; //已完成端口计数
 
             } catch (Exception e) {
                 SCANNING = 0;
@@ -195,8 +193,11 @@ public class MainActivity extends AppCompatActivity {
         try{
             Socket socket=new Socket(); //新建socket
             SocketAddress address=new InetSocketAddress(ip, port); //设置连接的ip和端口
+//            long beginTime = System.currentTimeMillis();
             socket.connect(address,2000); //尝试连接，超时2000ms
+//            long endTime = System.currentTimeMillis();
             socket.close();
+//            long delayTime = endTime - beginTime;
         } catch (Exception e) {
             System.out.println("Error 103");
             result = 0; //set 0 for close
